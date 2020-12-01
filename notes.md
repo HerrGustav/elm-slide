@@ -98,11 +98,6 @@
     myTuple = ("name", 2, "whatever")
     ```
     - tuples are not a function, even if they have brackets when deconstructing: "Comma means tuple!"
-    ```elm
-    -- deconstructing a tuple:
-    t = ("test", 2, 3, "something")
-    deconstructedTuple (a, b, c, d) = 
-    ```
     
 
     
