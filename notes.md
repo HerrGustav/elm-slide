@@ -5,9 +5,14 @@
 - Double Quotes are for strings, single quotes are for utf-8 characters aka "chars"
 
 ### Conventions:
-- p. 10: conventions:
+- p. 10: 
     - all letters in a naming should be uninterrupted 
     - camelCase is preferred
+- p. 31: use the direct element function, instead of `node` whenever possible
+- p. 33: commas for a multiline literal in Elm should be in front of the next line, not the last as in js
+    - this is due to the fact, that it would be still valid, but a wrong number of arguments
+    - this guideline can help to reduce those errors
+- p. 37: Don't expose everything from a module to your file, only if it's something like the `Html`module, which is meant to resemble Html-Markup
 
 ### Expressions:
 - p. 10: "An expression is anything that evaluates to a single value."
@@ -26,18 +31,18 @@
 - p. 14: no return value for functions, because Elm only has a function body in form of an expression aka "evaluates to a single value"
     - --> no early returns as we know them from js!
     ```js
-    function capitalize(str) {
-    if (!str) {
-        return str; }
-        Early return
-        return str[0].toUpperCase() + str.slice(1); 
-    }
+        function capitalize(str) {
+        if (!str) {
+            return str; }
+            Early return
+            return str[0].toUpperCase() + str.slice(1); 
+        }
 
-    // the elm way would be --->
+        // the elm way would be --->
 
-    function capitalize(str) {
-        return !str ? str : str[0].toUpperCase() + str.slice(1);
-    }
+        function capitalize(str) {
+            return !str ? str : str[0].toUpperCase() + str.slice(1);
+        }
 
     ```  
 - p. 15: Spaces are right, tabs are an error in Elm     
@@ -45,15 +50,15 @@
 - p. 18: **High Order Function** : A function, that accepts other functions as arguments, like `String.filter [function argument] --> filtered output`
 - p. 18: **Let Expression** : A way of scoping values, methods, etc. to one function. It's wrapped inside like that:
     ```elm 
-    withoutDashes str =
-        let
-            dash =
-                '-'
-               
-            isKeepable character =
-                character /= dash 
-        in 
-        String.filter isKeepable str
+        withoutDashes str =
+            let
+                dash =
+                    '-'
+                
+                isKeepable character =
+                    character /= dash 
+            in 
+            String.filter isKeepable str
     ```
 - p. 19: * Anonymous Functions * : no name, begin with `\`, use `->` instead if `=`, e.g.: `\w h -> w * h`
     - especially useful as an argument to other functions, e.g. the string filter function
@@ -62,15 +67,15 @@
 - p. 20: Operators are nothing else then functions in Elm, the only accept exactly two arguments, aka they compare two values
     - usually we write operators in "infix-style", aka `value [operator] value`, but you can also write it in "prefix-style"
     ```elm
-       7 - 4 == 3 --- returns True
-       (-) 7 4 == 3 --- also returns True
+        7 - 4 == 3 --- returns True
+        (-) 7 4 == 3 --- also returns True
     ```
     ```bash
       > (-)
        <function> : number -> number -> number
     ```
 
-### Collections aka data structures
+### Collections aka data structures:
 - p. 22: Elm has basic collections in form of lists, records and tuples, **they are always immutable**
     - **Lists** in Elm consist of values of the same type, it has no methods, they can vary in size
         - this is true for almost all collections, it allows predictability and safer code
@@ -80,13 +85,13 @@
         - fields can not be added or removed
         - they are the "objects from javascript" in Elm, e.g.
         ```elm
-        { name = "Li", cats = 2 } -- they use "=" as delimiter, instead of ":" in js
+            { name = "Li", cats = 2 } -- they use "=" as delimiter, instead of ":" in js
         ```
         - as usual: they are immutable, modifying them is only possible through "record updates"
             - it works almost like the "spread operator" in js, the syntax is:
             ```elm
-            myObject = { name = "User", likes = 2 }
-            myUpdatedObject = { myObject | likes = 3 } -- increment likes with new value
+                myObject = { name = "User", likes = 2 }
+                myUpdatedObject = { myObject | likes = 3 } -- increment likes with new value
             ```
 
         - they are basically only "key:value storage", no fancy js magic around like `Object.keys({...})`
@@ -95,13 +100,26 @@
     - max 3 values, mostly common are two value pairs, like `("key", "value")`
     - e.g.
     ```elm
-    myTuple = ("name", 2, "whatever")
+        myTuple = ("name", 2, "whatever")
     ```
     - tuples are not a function, even if they have brackets when deconstructing: "Comma means tuple!"
     
+### Page rendering in Elm:
+- p. 31: In Elm you don't write markup, you call functions (what else?), which create the DOM representations for you. 
+    ```elm
+    -- creating a DOM node with elm, using the "node" function:
+        node "button" [class "funky", id "submitter"] [text "Submit"]
+    --  js would be something like: node function( arg1: string,   [argList of functions],  [argList2 of functions] )
+    ```
+    - the `Html` module in Elm is exporting these functions, it's also possible to drop the "node" in front of it, because the module is also providing convenience methods, that let you call the element function directly, e.g. calling 
+    ```elm
+        button [class "someClass"] [text "Click me"]
+    --  it's always function([list_of_attribute_functions], [list_of_children])       
+    ```
 
-    
-
+### The Elm Runtime:
+- p. 39: the code from elm, which runs in the background to enable application state, event listening, scheduling Dom updates, etc.
+- p. 40: [Elm Architecture](./assets/Elm_Architecture_Diagramm.png)
 
 ## Screenshots:    
 - the compiler is your [best friend](./assets/nice_elm_compiler_message.png)
