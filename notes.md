@@ -28,6 +28,33 @@
     ```
     - The `else` part is mandatory(!) in Elm: p. 12
 - p. 11: `!==` is `/=` in the Elm world, `!something` is `not(something)`
+- p. 65f: Elm has beside the `if/else` pattern, also a pattern, which is pretty similar to "switch" statements in js, e.g.:
+
+  ```elm
+   type SomeType
+    = Foo
+    | Bar
+    | Baz
+
+   parseArgument : SomeType -> String
+   parseArgument someType =
+    case argument of
+      Foo -> "return something"
+      Bar -> "return also something"
+      _ -> "return something if nothing is matching"
+  ```
+
+  - The cool thing about this pattern is: You always need to return for every possible case, that means you almost always need a default return case, which is expressed by `_-> `. This means, you can always be sure to cover every case.
+  - There are no "break" commands, and also no fall-through like in js.
+  - If you listed are possible arguments like so, you don't need to specify a default return. Elm knows in this case already that you have only three possible cases defined by the custom type, which tells elm that all cases are covered.
+
+  ```elm
+     parseArgument someType =
+      case argument of
+        Foo -> "return something"
+        Bar -> "return also something"
+        Baz -> "return something too"
+  ```
 
 ### Functions:
 
@@ -195,6 +222,28 @@ type alias Photo : { url : String }
   - Elm is therefore technically only calling functions, which take one argument at a time
 
 - p. 67f.: Enums are called **Custom Types** in Elm. Like that it can be specified which values a type can contain
+  - They are defined like this:
+  ```elm
+  type SomeType
+    = Foo
+    | Bar
+    | Baz
+  ```
+  - But compared to Typescript these are "real" types and not just a bunch of integers or strings under the hood
+  - custom types are unique and comparing them will only match if you have exactly two of the same type, because they are "real" new types, it is also why they are written in capital letters --> in fact the booleans in Elm are exactly that: a custom type consisting of the two values:
+  ```elm
+  type Bool  = True | False
+  ```
+  - p. 70: Sadly you it's not possible to iterate over custom types, like it is possible in typescript with enums using the magic of `Object.values(...)`, see also this [post from stackoverflow](https://stackoverflow.com/questions/38132338/is-it-possible-to-iterate-over-union-type-in-elm)
+- p. 71: In Elm there is no such thing as `undefined` or `null` (! :) )
+  - There is a special custom type for it, describing if something is empty or not found:
+  ```elm
+  type Maybe value
+    = Just value -- if a value was found (it's actually a function under the hood which returns a value of type "Maybe")
+    | Nothing -- if nothing was found aka "null" or "undefined" Nothing is a value of type "Maybe"
+  ```
+  - compared with js it looks like so: ![ElmMaybeVsJavascriptUndefined](./assets/ElmMaybeVsJavascriptUndefined.png)
+  - p. 72: this also shows: Types can have a variable!
 
 ### Page rendering in Elm:
 
