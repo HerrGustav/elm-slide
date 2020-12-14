@@ -15,6 +15,7 @@
   - this is due to the fact, that it would be still valid, but a wrong number of arguments
   - this guideline can help to reduce those errors
 - p. 37: Don't expose everything from a module to your file, only if it's something like the `Html`module, which is meant to resemble Html-Markup
+- p. 76: Don't use the default operator `_ -> something` in case expressions if not completely necessary. Like that you make sure the compiler can help in case the code is missing some type / case handling
 
 ### Expressions:
 
@@ -118,6 +119,14 @@
   (\foo -> bar baz foo) -- can always be re-written to:
   (bar baz)
   ```
+- p. 78: Functions in Elm are always returning the same defined result. So something like a "random" function like in Javascript does not work directly out of the box.
+
+### Commands:
+
+- p. 79: Commands are a value, which describes an operation to Elms runtime. The outputs can vary, which is the opposite to the way functions do work in Elm.
+- Commands are not instant calls, as it would be the case with functions. You _declare_ that you would like to have one, which is then handled via the update function as it is done with evens like `onClick` and others.
+- p. 82: Commands are always run after the view function, when the update function is also updating the model at the same time as a command is fired
+- p. 83: The only _two places to run Commands_ are in `update` or `init`
 
 ### Operators:
 
@@ -244,6 +253,14 @@ type alias Photo : { url : String }
   ```
   - compared with js it looks like so: ![ElmMaybeVsJavascriptUndefined](./assets/ElmMaybeVsJavascriptUndefined.png)
   - p. 72: this also shows: Types can have a variable!
+- p. 83: `()`: This thing is called a _unit_ and it is both: a value and a type.
+  - it can be replaced by another type, so it can only satisfied by using exactly this type
+  - with functions that takes this type as an argument, it is described that they always return exactly the same (which makes sense, because with `()` there is nothing inside which is "variable" and could change the input to the function)
+  - using it inside a Program type declaration like so:
+  ```elm
+  Program : () Model Msg -- args are "Flags" "Type of Model" "Type of Msg"
+  ```
+  means that this is a program, which does not accept any flags currently
 
 ### Page rendering in Elm:
 

@@ -6,11 +6,17 @@ import Array exposing (Array)
 import Browser
 import Html exposing (Html, button, div, h1, h3, img, input, label, text)
 import Html.Attributes exposing (..)
-import Html.Events exposing (onClick)
+import Html.Events exposing (onCheck, onClick)
+import Random
 
 
 type alias Photo =
     { url : String }
+
+
+randomPhotoPicker : Random.Generator Int
+randomPhotoPicker =
+    Random.int 0 (Array.length photoArray - 1)
 
 
 urlPrefix : String
@@ -23,15 +29,15 @@ viewThumbnail selectedUrl thumb =
     img
         [ src (urlPrefix ++ thumb.url)
         , classList [ ( "selected", selectedUrl == thumb.url ) ]
-        , onClick { description = "ClickedPhoto", data = thumb.url }
+        , onClick (ClickedPhoto thumb.url)
         ]
         []
 
 
-viewSizeChooser : ThumbnailSize -> Html Msg
-viewSizeChooser size =
+viewSizeChooser : ThumbnailSize -> ThumbnailSize -> Html Msg
+viewSizeChooser default size =
     label []
-        [ input [ type_ "radio", name "size" ] []
+        [ input [ type_ "radio", name "size", onClick (ClickedSize size), checked (default == size) ] []
         , text (sizeToString size)
         ]
 
@@ -64,7 +70,7 @@ initialModel =
         , { url = "3.jpeg" }
         ]
     , selectedUrl = "1.jpeg"
-    , chosenSize = Small
+    , chosenSize = Medium
     }
 
 
@@ -79,18 +85,21 @@ type ThumbnailSize
     | Small
 
 
-type alias Msg =
-    { description : String, data : String }
+type Msg
+    = ClickedPhoto String
+    | ClickedSize ThumbnailSize
+    | ClickedSurprise
+    | GotRandomIndex Int
 
 
 view : Model -> Html Msg
 view model =
     div [ class "content" ]
         [ h1 [] [ text "Photos" ]
-        , button [ onClick { description = "ClickedSupriseMe", data = "" } ] [ text "Surprise Me!" ]
+        , button [ onClick ClickedSurprise ] [ text "Surprise Me!" ]
         , h3 [] [ text "Thumbnail Size:" ]
         , div [ id "choose-size" ]
-            (List.map viewSizeChooser [ Small, Medium, Large ])
+            (List.map (viewSizeChooser model.chosenSize) [ Small, Medium, Large ])
         , div [ id "thumbnails", class (sizeToString model.chosenSize) ]
             (List.map (viewThumbnail model.selectedUrl) model.photos)
         , img
@@ -111,21 +120,27 @@ getPhotoUrl index =
             ""
 
 
+update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg.description of
-        "ClickedPhoto" ->
-            { model | selectedUrl = msg.data }
+    case msg of
+        ClickedPhoto url ->
+            ( { model | selectedUrl = url }, Cmd.none )
 
-        "ClickedSupriseMe" ->
-            { model | selectedUrl = "2.jpeg" }
+        ClickedSurprise ->
+            ( model, Random.generate GotRandomIndex randomPhotoPicker )
 
-        _ ->
-            model
+        ClickedSize size ->
+            ( { model | chosenSize = size }, Cmd.none )
+
+        GotRandomIndex index ->
+            ( { model | selectedUrl = getPhotoUrl index }, Cmd.none )
 
 
+main : Program () Model Msg
 main =
-    Browser.sandbox
-        { init = initialModel
+    Browser.element
+        { init = \flags -> ( initialModel, Cmd.none )
         , view = view
         , update = update
+        , subscriptions = \model -> Sub.none
         }
