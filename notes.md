@@ -3,10 +3,10 @@
 ## Page summaries:
 
 - p. 8 : Strong type system, also for operators (+ for numbers, ++ for strings)
-- Double Quotes are for strings, single quotes are for utf-8 characters aka "chars"
 
 ### Conventions:
 
+- Double Quotes are for strings, single quotes are for utf-8 characters aka "chars"
 - p. 10:
   - all letters in a naming should be uninterrupted
   - camelCase is preferred
@@ -16,6 +16,10 @@
   - this guideline can help to reduce those errors
 - p. 37: Don't expose everything from a module to your file, only if it's something like the `Html`module, which is meant to resemble Html-Markup
 - p. 76: Don't use the default operator `_ -> something` in case expressions if not completely necessary. Like that you make sure the compiler can help in case the code is missing some type / case handling
+- p. 96: If a function is ignoring a value or it's not used, it can be dropped/ignored as it is done it Golang by using an underscore for the value, e.g.:
+```elm
+_ = generateValue() -- the value is not used
+```
 
 ### Expressions:
 
@@ -140,6 +144,8 @@
     > (-)
      <function> : number -> number -> number
   ```
+- p. 94f.: the `<|` operator is used to call a function. It can be used to pass in a function to another function in a cleaner way by dropping the parentheses
+
 
 ### Collections aka data structures:
 
@@ -154,8 +160,9 @@
           -- the first argument is the function which specifies how the mapping over each item should be performed
           -- the second argument is the list collection, you want to iterate over
       ```
-- p. 24f.:
+    - p. 98: The `a :: b` pattern gives you the first element of a list and the rest of the list as two arguments. This way, you can describe for example that a function expects to get a non empty list by providing at least one element of this list. E.g. a list of photos would be: `firstPhoto :: otherPhotos` 
 
+- p. 24f.:
   - **Records** is a collection of fixed named fields with their values of varying type
 
     - fields can not be added or removed
@@ -254,7 +261,7 @@ type alias Photo : { url : String }
   - compared with js it looks like so: ![ElmMaybeVsJavascriptUndefined](./assets/ElmMaybeVsJavascriptUndefined.png)
   - p. 72: this also shows: Types can have a variable!
 - p. 83: `()`: This thing is called a _unit_ and it is both: a value and a type.
-  - it can be replaced by another type, so it can only satisfied by using exactly this type
+  - p. 85: it can be replaced by another type, so it can only satisfied by using exactly this type, because the only value of `()` is `()`
   - with functions that takes this type as an argument, it is described that they always return exactly the same (which makes sense, because with `()` there is nothing inside which is "variable" and could change the input to the function)
   - using it inside a Program type declaration like so:
   ```elm
