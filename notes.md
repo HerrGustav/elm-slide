@@ -145,6 +145,13 @@ _ = generateValue() -- the value is not used
      <function> : number -> number -> number
   ```
 - p. 94f.: the `<|` operator is used to call a function. It can be used to pass in a function to another function in a cleaner way by dropping the parentheses
+- p. 99: the `|>` operator is called the "pipeline operator". It basically passes a value from a function call to the next function call. This operator can make it easier to write and also read chained function calls. E.g.: Something like:
+```elm
+    Loaded (firstPhoto :: otherPhotos) _ -> 
+      Random.uniform firstPhoto otherPhotos 
+      |> Random.generate GotRandomPhoto -- random uniform value will be appended here 
+      |> Tuple.pair model -- the last value will be inserted here with the output from random generate 
+```
 
 
 ### Collections aka data structures:
@@ -161,6 +168,7 @@ _ = generateValue() -- the value is not used
           -- the second argument is the list collection, you want to iterate over
       ```
     - p. 98: The `a :: b` pattern gives you the first element of a list and the rest of the list as two arguments. This way, you can describe for example that a function expects to get a non empty list by providing at least one element of this list. E.g. a list of photos would be: `firstPhoto :: otherPhotos` 
+      - The typing would be for an array of type photo: `firstPhoto : photo, otherPhotos : List photo `
 
 - p. 24f.:
   - **Records** is a collection of fixed named fields with their values of varying type

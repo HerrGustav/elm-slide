@@ -4,3 +4,4 @@ elm-stuff
 repl-temp-*
 assets/.DS_Store
 .DS_Store
+app.js
