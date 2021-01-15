@@ -17,9 +17,12 @@
 - p. 37: Don't expose everything from a module to your file, only if it's something like the `Html`module, which is meant to resemble Html-Markup
 - p. 76: Don't use the default operator `_ -> something` in case expressions if not completely necessary. Like that you make sure the compiler can help in case the code is missing some type / case handling
 - p. 96: If a function is ignoring a value or it's not used, it can be dropped/ignored as it is done it Golang by using an underscore for the value, e.g.:
+
 ```elm
 _ = generateValue() -- the value is not used
 ```
+
+- p. 106: In elm the `as`keyword is existing as well and let's us name or rename a value to this variable them that we specify.
 
 ### Expressions:
 
@@ -59,6 +62,30 @@ _ = generateValue() -- the value is not used
         Foo -> "return something"
         Bar -> "return also something"
         Baz -> "return something too"
+  ```
+
+  - p. 107f.: Elm's pattern matching is pretty powerful and you can often condense nested switch statements into one, e.g.:
+
+    ```elm
+    case msg of
+      -- other cases
+      GotPhotos result ->
+        case result of
+          Ok responseStr ->
+            -- do Something
+          Err errStr ->
+            --- do Something
+
+    ```
+
+    is the same as writing:
+
+  ```elm
+  case msg of
+    GotPhotos (Ok responseStr) ->
+      -- do Something
+    GotPhotos (Err errStr) ->
+      -- do Something
   ```
 
 ### Functions:
@@ -131,6 +158,11 @@ _ = generateValue() -- the value is not used
 - Commands are not instant calls, as it would be the case with functions. You _declare_ that you would like to have one, which is then handled via the update function as it is done with evens like `onClick` and others.
 - p. 82: Commands are always run after the view function, when the update function is also updating the model at the same time as a command is fired
 - p. 83: The only _two places to run Commands_ are in `update` or `init`
+- p. 100f.: Commands are the way in Elm to get to values where you want to have different outputs from a function, because by default Elm guarantees that all functions are predictable by their inputs and outputs.
+  - The other guarantee Elm states about functions is, that they can not have any side-effects. (Nothing outside of a function can changed by a function)
+    - That means a function which is executed can not change external state. (E.g. No global "let" are possible)
+    - effects are generally only processed by the elm runtime, they are not handled by any elm function you write on your own. This prevents a conflict with the principles and rule-sets of Elm. (It's also called "managed-effects", p. 101)
+  - Http requests are therefore also "effects" as they are able to generate different outputs. So requesting a server via http is handled by the Elm Runtime, which means you need to perform a "Command".
 
 ### Operators:
 
@@ -146,17 +178,18 @@ _ = generateValue() -- the value is not used
   ```
 - p. 94f.: the `<|` operator is used to call a function. It can be used to pass in a function to another function in a cleaner way by dropping the parentheses
 - p. 99: the `|>` operator is called the "pipeline operator". It basically passes a value from a function call to the next function call. This operator can make it easier to write and also read chained function calls. E.g.: Something like:
-```elm
-    Loaded (firstPhoto :: otherPhotos) _ -> 
-      Random.uniform firstPhoto otherPhotos 
-      |> Random.generate GotRandomPhoto -- random uniform value will be appended here 
-      |> Tuple.pair model -- the last value will be inserted here with the output from random generate 
-```
 
+```elm
+    Loaded (firstPhoto :: otherPhotos) _ ->
+      Random.uniform firstPhoto otherPhotos
+      |> Random.generate GotRandomPhoto -- random uniform value will be appended here
+      |> Tuple.pair model -- the last value will be inserted here with the output from random generate
+```
 
 ### Collections aka data structures:
 
 - p. 22: Elm has basic collections in form of lists, records and tuples, **they are always immutable**
+
   - **Lists** in Elm consist of values of the same type, they have no methods, they can vary in size
     - this is true for almost all collections, it allows predictability and safer code
     - they resemble as the immutable version of javascript arrays
@@ -167,10 +200,11 @@ _ = generateValue() -- the value is not used
           -- the first argument is the function which specifies how the mapping over each item should be performed
           -- the second argument is the list collection, you want to iterate over
       ```
-    - p. 98: The `a :: b` pattern gives you the first element of a list and the rest of the list as two arguments. This way, you can describe for example that a function expects to get a non empty list by providing at least one element of this list. E.g. a list of photos would be: `firstPhoto :: otherPhotos` 
+    - p. 98: The `a :: b` pattern gives you the first element of a list and the rest of the list as two arguments. This way, you can describe for example that a function expects to get a non empty list by providing at least one element of this list. E.g. a list of photos would be: `firstPhoto :: otherPhotos`
       - The typing would be for an array of type photo: `firstPhoto : photo, otherPhotos : List photo `
 
 - p. 24f.:
+
   - **Records** is a collection of fixed named fields with their values of varying type
 
     - fields can not be added or removed
@@ -229,6 +263,14 @@ _ = generateValue() -- the value is not used
 ```elm
 type alias Photo : { url : String }
 ```
+
+- p. 106f.: an aliased type also always provides a convenience method that can transform given input to the described type. So for the type alias of "Photo", this would be a function looking like so:
+
+```elm
+Photo : String -> Photo --- aka { url : String }
+```
+
+- this means also that something like : `List.map (\url -> { url = url }) urls` can be written as ` List.map Photo urls`
 
 - p. 64: If a function has multiple arguments, you need to type it in the way that elm will call this function, aka they are curried by default (!)
 
@@ -304,6 +346,25 @@ type alias Photo : { url : String }
   - After the update function has run, the view returns always a fresh html (!=DOM is not re-created, like in React and other frameworks)
 - p. 50f.: The _Browser_ module is the module which is needed to create an interactive application. It's describing too the elm runtime how the view (=html) looks like and how to deal with events via update(=processes the messages and updates the elm state if needed).
 - p. 53: The **View** function is the place where the html is defined (like the render function in React)
+
+### Http Requests:
+
+- p. 100f.: As mentioned above already: http requests are an effect and are handled therefore by the Elm Runtime. We can call them through commands and will eventually get the result back passed in the update in form of a message
+- p. 101f.: Methods like GET by the http module expect not only the url but also which value we are expecting to get returned by this request, e.g.:
+
+```elm
+Http.get : { url : String, expect : Expect msg } -> Cmd msg -- the "msg" is lowercase and signifies a type variable, basically the Expect will specify which type "msg" has
+```
+
+- Expect can be filled with one of the expect values of the http value, they will full-fill a Result type, which accounts not only for an actual value received, but also a potential error. Result is a type for an operation, which can fail. It's type looks like this:
+
+```elm
+type Result errValue okValue
+    = Err errValue
+    | Ok okValue
+```
+
+- This forces us to handle a potential error case as well, similar to using the "Maybe" type for accessing a value from an array
 
 ## Screenshots:
 

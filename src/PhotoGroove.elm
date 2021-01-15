@@ -6,6 +6,7 @@ import Browser
 import Html exposing (Html, button, div, h1, h3, img, input, label, text)
 import Html.Attributes exposing (..)
 import Html.Events exposing (onCheck, onClick)
+import Http exposing (Error)
 import Random
 
 
@@ -52,7 +53,7 @@ sizeToString size =
 type Status
     = Loading
     | Loaded (List Photo) String
-    | Error String
+    | Errored String
 
 
 type alias Model =
@@ -79,6 +80,7 @@ type Msg
     | ClickedSize ThumbnailSize
     | ClickedSurprise
     | GotRandomPhoto Photo
+    | GotPhotos (Result Http.Error String)
 
 
 viewLoaded : List Photo -> String -> ThumbnailSize -> List (Html Msg)
@@ -108,9 +110,16 @@ view model =
             Loading ->
                 []
 
-            Error errorMessage ->
+            Errored errorMessage ->
                 [ text ("Error: " ++ errorMessage) ]
-        
+
+
+initialCmd : Cmd Msg
+initialCmd =
+    Http.get
+        { url = "http://elm-in-action.com/photos/list"
+        , expect = Http.expectString GotPhotos
+        }
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -120,44 +129,63 @@ update msg model =
             ( { model | status = selectUrl url model.status }, Cmd.none )
 
         ClickedSurprise ->
-           case model.status of
-            Loaded (firstPhoto :: otherPhotos) _ -> 
-                Random.uniform firstPhoto otherPhotos
-                |> Random.generate GotRandomPhoto 
-                |> Tuple.pair model
-                
-            Loaded [] _ -> 
-                (model, Cmd.none)
-            Loading -> 
-                (model, Cmd.none)
-            Error errorMessage -> 
-                (model, Cmd.none)
+            case model.status of
+                Loaded (firstPhoto :: otherPhotos) _ ->
+                    Random.uniform firstPhoto otherPhotos
+                        |> Random.generate GotRandomPhoto
+                        |> Tuple.pair model
 
-                
+                Loaded [] _ ->
+                    ( model, Cmd.none )
+
+                Loading ->
+                    ( model, Cmd.none )
+
+                Errored errorMessage ->
+                    ( model, Cmd.none )
 
         ClickedSize size ->
             ( { model | chosenSize = size }, Cmd.none )
 
         GotRandomPhoto photo ->
-            ({ model | status = selectUrl photo.url model.status}, Cmd.none)
+            ( { model | status = selectUrl photo.url model.status }, Cmd.none )
+
+        -- GotPhotos is a http request, which reveils a result, which always holds two possible outcomes:
+        -- either it's "ok" and we get the string we want or it is an error, which we need to handle in such a case.
+        GotPhotos (Ok responseStr) ->
+            case String.split "," responseStr of
+                (firstUrl :: _) as urls ->
+                    let
+                        photos =
+                            List.map (\url -> { url = url }) urls
+                    in
+                    ( { model | status = Loaded photos firstUrl }, Cmd.none )
+
+                [] ->
+                    ( { model | status = Errored "0 photos found" }, Cmd.none )
+
+        GotPhotos (Err httpError) ->
+            ( { model | status = Errored "Server error!" }, Cmd.none )
+
 
 selectUrl : String -> Status -> Status
-selectUrl url status = 
+selectUrl url status =
     case status of
-        Loaded photos _ -> 
+        Loaded photos _ ->
             Loaded photos url
-        
-        Loading -> 
+
+        Loading ->
             status
 
-        Error errorMessage -> 
+        Errored errorMessage ->
             status
+
 
 main : Program () Model Msg
 main =
     Browser.element
-        { init = \flags -> ( initialModel, Cmd.none )
+        { init = \_ -> ( initialModel, initialCmd )
         , view = view
         , update = update
-        , subscriptions = \model -> Sub.none
+        , subscriptions = \_ -> Sub.none
         }
