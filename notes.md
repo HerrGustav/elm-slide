@@ -179,12 +179,14 @@ _ = generateValue() -- the value is not used
 - p. 94f.: the `<|` operator is used to call a function. It can be used to pass in a function to another function in a cleaner way by dropping the parentheses
 - p. 99: the `|>` operator is called the "pipeline operator". It basically passes a value from a function call to the next function call. This operator can make it easier to write and also read chained function calls. E.g.: Something like:
 
-```elm
-    Loaded (firstPhoto :: otherPhotos) _ ->
-      Random.uniform firstPhoto otherPhotos
-      |> Random.generate GotRandomPhoto -- random uniform value will be appended here
-      |> Tuple.pair model -- the last value will be inserted here with the output from random generate
-```
+  ```elm
+      Loaded (firstPhoto :: otherPhotos) _ ->
+        Random.uniform firstPhoto otherPhotos
+        |> Random.generate GotRandomPhoto -- random uniform value will be appended here
+        |> Tuple.pair model -- the last value will be inserted here with the output from random generate
+  ```
+
+  - see also the example of p. 120
 
 ### Collections aka data structures:
 
@@ -266,26 +268,27 @@ type alias Photo : { url : String }
 
 - p. 106f.: an aliased type also always provides a convenience method that can transform given input to the described type. So for the type alias of "Photo", this would be a function looking like so:
 
-```elm
-Photo : String -> Photo --- aka { url : String }
-```
+  ```elm
+  Photo : String -> Photo --- aka { url : String }
+  ```
 
-- this means also that something like : `List.map (\url -> { url = url }) urls` can be written as ` List.map Photo urls`
+  - this means also that something like : `List.map (\url -> { url = url }) urls` can be written as ` List.map Photo urls`
+  - p. 117: this convenience methods takes the arguments in the same order as they appear on the type. So changing the order in the type itself will introduce breaking changes to the convenience function itself (!)
 
 - p. 64: If a function has multiple arguments, you need to type it in the way that elm will call this function, aka they are curried by default (!)
 
-  - This means Elm will always treat a function that way, that it can also be just partially applied, e.g.:
+- This means Elm will always treat a function that way, that it can also be just partially applied, e.g.:
 
-  ```elm
-  sayHello : String -> String -> String
-  sayHello firstName lastName = "Hello" ++ firstName ++ " " ++ lastName
+```elm
+sayHello : String -> String -> String
+sayHello firstName lastName = "Hello" ++ firstName ++ " " ++ lastName
 
-  --- partially applied:
-  sayHello "Michael"
-  > String -> String -- aka one String to go to return the final String
-  ```
+--- partially applied:
+sayHello "Michael"
+> String -> String -- aka one String to go to return the final String
+```
 
-  - Elm is therefore technically only calling functions, which take one argument at a time
+- Elm is therefore technically only calling functions, which take one argument at a time
 
 - p. 67f.: Enums are called **Custom Types** in Elm. Like that it can be specified which values a type can contain
   - They are defined like this:
@@ -352,17 +355,19 @@ Photo : String -> Photo --- aka { url : String }
 - p. 100f.: As mentioned above already: http requests are an effect and are handled therefore by the Elm Runtime. We can call them through commands and will eventually get the result back passed in the update in form of a message
 - p. 101f.: Methods like GET by the http module expect not only the url but also which value we are expecting to get returned by this request, e.g.:
 
-```elm
-Http.get : { url : String, expect : Expect msg } -> Cmd msg -- the "msg" is lowercase and signifies a type variable, basically the Expect will specify which type "msg" has
-```
+  ```elm
+  Http.get : { url : String, expect : Expect msg } -> Cmd msg -- the "msg" is lowercase and signifies a type variable, basically the Expect will specify which type "msg" has
+  ```
 
 - Expect can be filled with one of the expect values of the http value, they will full-fill a Result type, which accounts not only for an actual value received, but also a potential error. Result is a type for an operation, which can fail. It's type looks like this:
 
-```elm
-type Result errValue okValue
-    = Err errValue
-    | Ok okValue
-```
+  ```elm
+  type Result errValue okValue
+      = Err errValue
+      | Ok okValue
+  ```
+
+  - p. 118: the error value is one of the http error type enum
 
 - This forces us to handle a potential error case as well, similar to using the "Maybe" type for accessing a value from an array
 
