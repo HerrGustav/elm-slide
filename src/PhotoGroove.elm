@@ -3,12 +3,13 @@ module PhotoGroove exposing (main)
 --- "(..)" means expose everything from that module.
 
 import Browser
-import Html exposing (Html, button, div, h1, h3, img, input, label, text)
-import Html.Attributes exposing (checked, class, classList, id, name, src, title, type_)
+import Html exposing (Html, button, div, h1, h3, img, input, label, node, text)
+import Html.Attributes as Attr exposing (checked, class, classList, id, name, src, title, type_)
 import Html.Events exposing (onCheck, onClick)
 import Http exposing (Error)
 import Json.Decode exposing (Decoder, int, list, string, succeed)
 import Json.Decode.Pipeline exposing (optional, required)
+import Json.Encode as Encode
 import Random
 
 
@@ -101,6 +102,11 @@ viewLoaded : List Photo -> String -> ThumbnailSize -> List (Html Msg)
 viewLoaded photos selectedUrl chosenSize =
     [ h1 [] [ text "Photos" ]
     , button [ onClick ClickedSurprise ] [ text "Surprise Me!" ]
+    , div [ class "filters" ]
+        [ viewFilter "Hue" 0
+        , viewFilter "Ripple" 0
+        , viewFilter "Noise" 0
+        ]
     , h3 [] [ text "Thumbnail Size:" ]
     , div [ id "choose-size" ]
         (List.map (viewSizeChooser chosenSize) [ Small, Medium, Large ])
@@ -126,6 +132,16 @@ view model =
 
             Errored errorMessage ->
                 [ text ("Error: " ++ errorMessage) ]
+
+
+viewFilter : String -> Int -> Html Msg
+viewFilter name magnitude =
+    div
+        [ class "filter-slider" ]
+        [ label [] [ text name ]
+        , rangeSlider [ Attr.max "11", Attr.property "val" (Encode.int magnitude) ] []
+        , label [] [ text (String.fromInt magnitude) ]
+        ]
 
 
 initialCmd : Cmd Msg
@@ -189,6 +205,11 @@ selectUrl url status =
 
         Errored errorMessage ->
             status
+
+
+rangeSlider : List (Html.Attribute msg) -> List (Html msg) -> Html msg
+rangeSlider attributes children =
+    node "range-slider" attributes children
 
 
 main : Program () Model Msg

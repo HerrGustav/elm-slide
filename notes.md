@@ -22,7 +22,7 @@
 _ = generateValue() -- the value is not used
 ```
 
-- p. 106: In elm the `as`keyword is existing as well and let's us name or rename a value to this variable them that we specify.
+- p. 106: In elm the `as`keyword is existing as well and let's us name or rename a value to the variable name that we specify.
 
 ### Expressions:
 
@@ -54,7 +54,7 @@ _ = generateValue() -- the value is not used
 
   - The cool thing about this pattern is: You always need to return for every possible case, that means you almost always need a default return case, which is expressed by `_-> `. This means, you can always be sure to cover every case.
   - There are no "break" commands, and also no fall-through like in js.
-  - If you listed are possible arguments like so, you don't need to specify a default return. Elm knows in this case already that you have only three possible cases defined by the custom type, which tells elm that all cases are covered.
+  - If you listed all possible arguments like so, you don't need to specify a default return. Elm knows in this case already that you have e.g. only three possible cases defined by the custom type, which tells elm that all cases are covered.
 
   ```elm
      parseArgument someType =
@@ -96,19 +96,19 @@ _ = generateValue() -- the value is not used
   - --> no early returns as we know them from js!
 
   ```js
-      function capitalize(str) {
-      if (!str) {
-          return str; }
-          Early return
-          return str[0].toUpperCase() + str.slice(1);
-      }
+  function capitalize(str) {
+    if (!str) {
+      // Early return
+      return str;
+    }
+    return str[0].toUpperCase() + str.slice(1);
+  }
 
-      // the elm way would be --->
+  // the elm way would be --->
 
-      function capitalize(str) {
-          return !str ? str : str[0].toUpperCase() + str.slice(1);
-      }
-
+  function capitalize(str) {
+    return !str ? str : str[0].toUpperCase() + str.slice(1);
+  }
   ```
 
 - p. 15: Spaces are right, tabs are an error in Elm
@@ -128,10 +128,10 @@ _ = generateValue() -- the value is not used
           String.filter isKeepable str
   ```
 
-- p. 19: _ Anonymous Functions _ : no name, begin with `\`, use `->` instead if `=`, e.g.: `\w h -> w * h`
+- p. 19: _ Anonymous Functions _ : no name, begins with `\`, use `->` instead if `=`, e.g.: `\w h -> w * h`
   - especially useful as an argument to other functions, e.g. the string filter function
 - p. 47: Functions in Elm are _curied_ by default. This means: They accept less then the specified arguments, because they return a new function which will then accept the next argument, and so on.
-  - In js something like this would be done by doing:
+  - In js something like this would be done by writing:
     ```js
     function splitA(sep) {
         return function(str) {
@@ -155,24 +155,24 @@ _ = generateValue() -- the value is not used
 ### Commands:
 
 - p. 79: Commands are a value, which describes an operation to Elms runtime. The outputs can vary, which is the opposite to the way functions do work in Elm.
-- Commands are not instant calls, as it would be the case with functions. You _declare_ that you would like to have one, which is then handled via the update function as it is done with evens like `onClick` and others.
+- Commands are not instant calls, as it would be the case with functions. You _declare_ that you would like to have one, which is then handled via the update function as it is done with events like `onClick` and others.
 - p. 82: Commands are always run after the view function, when the update function is also updating the model at the same time as a command is fired
 - p. 83: The only _two places to run Commands_ are in `update` or `init`
 - p. 100f.: Commands are the way in Elm to get to values where you want to have different outputs from a function, because by default Elm guarantees that all functions are predictable by their inputs and outputs.
-  - The other guarantee Elm states about functions is, that they can not have any side-effects. (Nothing outside of a function can changed by a function)
+  - The other guarantee Elm states about functions is, that they can not have any side-effects. (Nothing outside of a function can be changed by a function)
     - That means a function which is executed can not change external state. (E.g. No global "let" are possible)
     - effects are generally only processed by the elm runtime, they are not handled by any elm function you write on your own. This prevents a conflict with the principles and rule-sets of Elm. (It's also called "managed-effects", p. 101)
   - Http requests are therefore also "effects" as they are able to generate different outputs. So requesting a server via http is handled by the Elm Runtime, which means you need to perform a "Command".
 
 ### Operators:
 
-- p. 20: Operators are nothing else then functions in Elm, the only accept exactly two arguments, aka they compare two values
+- p. 20: Operators are nothing else than functions in Elm, they only accept exactly two arguments, aka they compare two values
   - usually we write operators in "infix-style", aka `value [operator] value`, but you can also write it in "prefix-style"
   ```elm
       7 - 4 == 3 --- returns True
       (-) 7 4 == 3 --- also returns True
   ```
-  ```bash
+  ```elm
     > (-)
      <function> : number -> number -> number
   ```
@@ -228,7 +228,7 @@ _ = generateValue() -- the value is not used
     - they are basically only "key:value storage", no fancy js magic around like `Object.keys({...})`
 
 - p. 26:
-  - **Tuples** it's a collection with of values with (potentially) different types
+  - **Tuples** it's a collection of values of (potentially) different types
   - max 3 values, mostly common are two value pairs, like `("key", "value")`
   - e.g.
   ```elm
@@ -240,7 +240,7 @@ _ = generateValue() -- the value is not used
 
 - p. 58: Types are tightly coupled to Elm. You generally can and should annotate your code by using them
 
-  - Annotations are always have to appear on top of the declaration of something, e.g.:
+  - Annotations always have to appear on top of the declaration of something, e.g.:
 
   ```elm
   url : String
@@ -303,7 +303,7 @@ sayHello "Michael"
   ```elm
   type Bool  = True | False
   ```
-  - p. 70: Sadly you it's not possible to iterate over custom types, like it is possible in typescript with enums using the magic of `Object.values(...)`, see also this [post from stackoverflow](https://stackoverflow.com/questions/38132338/is-it-possible-to-iterate-over-union-type-in-elm)
+  - p. 70: Sadly it's not possible to iterate over custom types, like it is possible in typescript with enums using the magic of `Object.values(...)`, see also this [post from stackoverflow](https://stackoverflow.com/questions/38132338/is-it-possible-to-iterate-over-union-type-in-elm)
 - p. 71: In Elm there is no such thing as `undefined` or `null` (! :) )
   - There is a special custom type for it, describing if something is empty or not found:
   ```elm
@@ -370,6 +370,7 @@ sayHello "Michael"
   - p. 118: the error value is one of the http error type enum
 
 - This forces us to handle a potential error case as well, similar to using the "Maybe" type for accessing a value from an array
+- Decoding Json responses is done by using Decoders (p. 111 - 119)
 
 ## Screenshots:
 
